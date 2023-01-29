@@ -1,6 +1,6 @@
 use crate::errors::Error;
 use crate::types::*;
-use chrono::{DateTime, FixedOffset, NaiveDateTime, Offset, Timelike};
+use chrono::{DateTime, FixedOffset, NaiveDateTime, Offset, Timelike, Utc};
 use neo4rs_macros::BoltStruct;
 use std::convert::TryInto;
 
@@ -96,6 +96,26 @@ impl TryInto<DateTime<FixedOffset>> for BoltDateTime {
             datetime,
             FixedOffset::east(self.tz_offset_seconds.value as i32),
         ))
+    }
+}
+
+impl Into<BoltDateTime> for DateTime<Utc> {
+    fn into(self) -> BoltDateTime {
+        DateTime::<FixedOffset>::from(self).into()
+    }
+}
+
+impl TryInto<DateTime<Utc>> for BoltDateTime {
+    type Error = Error;
+
+    fn try_into(self) -> Result<DateTime<Utc>> {
+        let seconds = self.seconds.value - self.tz_offset_seconds.value;
+        match NaiveDateTime::from_timestamp_opt(seconds, self.nanoseconds.value as u32) {
+            Some(datetime) => Ok(DateTime::<Utc>::from_utc(datetime, Utc)),
+            None => Err(Error::UnknownType(
+                "Seconds or nanoseconds out of range".to_string(),
+            )),
+        }
     }
 }
 

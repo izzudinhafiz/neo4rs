@@ -80,6 +80,16 @@ impl TryFrom<BoltType> for chrono::DateTime<chrono::FixedOffset> {
     }
 }
 
+impl TryFrom<BoltType> for chrono::DateTime<chrono::Utc> {
+    type Error = Error;
+    fn try_from(input: BoltType) -> Result<chrono::DateTime<chrono::Utc>> {
+        match input {
+            BoltType::DateTime(d) => d.try_into(),
+            _ => Err(Error::ConverstionError),
+        }
+    }
+}
+
 impl TryFrom<BoltType> for chrono::NaiveDateTime {
     type Error = Error;
 
@@ -242,6 +252,12 @@ impl Into<BoltType> for chrono::NaiveDateTime {
 }
 
 impl Into<BoltType> for chrono::DateTime<chrono::FixedOffset> {
+    fn into(self) -> BoltType {
+        BoltType::DateTime(self.into())
+    }
+}
+
+impl Into<BoltType> for chrono::DateTime<chrono::Utc> {
     fn into(self) -> BoltType {
         BoltType::DateTime(self.into())
     }
