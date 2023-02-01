@@ -39,7 +39,7 @@ mod tests {
         assert_eq!(
             bytes,
             Bytes::from_static(&[
-                0xB1,
+                0xB3,
                 0x10,
                 string::TINY | 5,
                 b'q',
@@ -74,7 +74,7 @@ mod tests {
         assert_eq!(
             bytes,
             Bytes::from_static(&[
-                0xB1,
+                0xB3,
                 0x10,
                 string::TINY | 5,
                 b'q',
