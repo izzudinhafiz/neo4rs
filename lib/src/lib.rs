@@ -377,10 +377,18 @@
 //!    let mut result = graph
 //!        .execute(query(
 //!            "WITH point({ x: 2.3, y: 4.5, crs: 'cartesian' }) AS p1,
-//!             point({ x: 1.1, y: 5.4, crs: 'cartesian' }) AS p2 RETURN point.distance(p1,p2) AS dist, p1, p2",
+//!             point({ x: 1.1, y: 5.4, crs: 'cartesian' }) AS p2 RETURN distance(p1,p2) AS dist, p1, p2",
 //!        ))
 //!        .await
-//!        .unwrap();
+//!        .unwrap_or(
+//!         // Neo4J >= 5.0
+//!         graph
+//!         .execute(query(
+//!             "WITH point({ x: 2.3, y: 4.5, crs: 'cartesian' }) AS p1,
+//!             point({ x: 1.1, y: 5.4, crs: 'cartesian' }) AS p2 RETURN point.distance(p1,p2) AS dist, p1, p2",
+//!         ))
+//!         .await
+//!         .unwrap());
 //!    let row = result.next().await.unwrap().unwrap();
 //!    let dist: f64 = row.get("dist").unwrap();
 //!    let p1: Point2D = row.get("p1").unwrap();
