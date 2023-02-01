@@ -42,6 +42,12 @@ impl BoltBoolean {
     }
 }
 
+impl Into<BoltBoolean> for bool {
+    fn into(self) -> BoltBoolean {
+        BoltBoolean::new(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
