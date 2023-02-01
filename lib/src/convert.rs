@@ -118,14 +118,23 @@ impl TryFrom<BoltType> for (chrono::NaiveTime, Option<chrono::FixedOffset>) {
     fn try_from(input: BoltType) -> Result<(chrono::NaiveTime, Option<chrono::FixedOffset>)> {
         match input {
             BoltType::Time(bolt_time) => {
-                let (time, offset) = bolt_time.into();
-                if offset.local_minus_utc() == 0 {
-                    Ok((time, None))
+                if let Ok((time, offset)) = bolt_time.try_into() {
+                    if offset.local_minus_utc() == 0 {
+                        Ok((time, None))
+                    } else {
+                        Ok((time, Some(offset)))
+                    }
                 } else {
-                    Ok((time, Some(offset)))
+                    Err(Error::ConverstionError)
                 }
             }
-            BoltType::LocalTime(d) => Ok((d.into(), None)),
+            BoltType::LocalTime(d) => {
+                if let Ok(time) = d.try_into() {
+                    Ok((time, None))
+                } else {
+                    Err(Error::ConverstionError)
+                }
+            }
             _ => Err(Error::ConverstionError),
         }
     }

@@ -1,3 +1,4 @@
+use crate::errors::Error;
 use crate::types::*;
 use chrono::{FixedOffset, NaiveTime, Offset, Timelike};
 use neo4rs_macros::BoltStruct;
@@ -26,15 +27,20 @@ impl Into<BoltTime> for (NaiveTime, FixedOffset) {
     }
 }
 
-impl Into<(NaiveTime, FixedOffset)> for BoltTime {
-    fn into(self) -> (NaiveTime, FixedOffset) {
+impl TryInto<(NaiveTime, FixedOffset)> for BoltTime {
+    type Error = Error;
+    fn try_into(self) -> Result<(NaiveTime, FixedOffset)> {
         let nanos = self.nanoseconds.value;
         let seconds = (nanos / 1_000_000_000) as u32;
         let nanoseconds = (nanos % 1_000_000_000) as u32;
-        (
-            NaiveTime::from_num_seconds_from_midnight(seconds, nanoseconds),
-            FixedOffset::east(self.tz_offset_seconds.value as i32),
-        )
+        let time = NaiveTime::from_num_seconds_from_midnight_opt(seconds, nanoseconds);
+        let offset = FixedOffset::east_opt(self.tz_offset_seconds.value as i32);
+
+        if time.is_some() && offset.is_some() {
+            Ok((time.unwrap(), offset.unwrap()))
+        } else {
+            Err(Error::ConverstionError)
+        }
     }
 }
 
@@ -48,12 +54,19 @@ impl Into<BoltLocalTime> for NaiveTime {
     }
 }
 
-impl Into<NaiveTime> for BoltLocalTime {
-    fn into(self) -> NaiveTime {
+impl TryInto<NaiveTime> for BoltLocalTime {
+    type Error = Error;
+
+    fn try_into(self) -> Result<NaiveTime> {
         let nanos = self.nanoseconds.value;
         let seconds = (nanos / 1_000_000_000) as u32;
         let nanoseconds = (nanos % 1_000_000_000) as u32;
-        NaiveTime::from_num_seconds_from_midnight(seconds, nanoseconds)
+
+        if let Some(time) = NaiveTime::from_num_seconds_from_midnight_opt(seconds, nanoseconds) {
+            Ok(time)
+        } else {
+            Err(Error::ConverstionError)
+        }
     }
 }
 
@@ -68,7 +81,7 @@ mod tests {
     #[test]
     fn should_serialize_time() {
         let time = NaiveTime::from_hms_nano_opt(7, 8, 9, 100).unwrap();
-        let offset = FixedOffset::east(2 * 3600);
+        let offset = FixedOffset::east_opt(2 * 3600).unwrap();
 
         let time: BoltTime = (time, offset).into();
 
@@ -92,7 +105,7 @@ mod tests {
             .unwrap();
 
         assert_eq!(time.to_string(), "07:08:09.000000100");
-        assert_eq!(offset, FixedOffset::east(2 * 3600));
+        assert_eq!(offset, FixedOffset::east_opt(2 * 3600).unwrap());
     }
 
     #[test]
