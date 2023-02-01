@@ -58,6 +58,17 @@ impl TryFrom<BoltType> for std::time::Duration {
     }
 }
 
+impl TryFrom<BoltType> for chrono::Duration {
+    type Error = Error;
+
+    fn try_from(input: BoltType) -> Result<chrono::Duration> {
+        match input {
+            BoltType::Duration(d) => d.try_into(),
+            _ => Err(Error::ConverstionError),
+        }
+    }
+}
+
 impl TryFrom<BoltType> for chrono::NaiveDate {
     type Error = Error;
 
@@ -233,6 +244,12 @@ impl Into<BoltType> for std::time::Duration {
     }
 }
 
+impl Into<BoltType> for chrono::Duration {
+    fn into(self) -> BoltType {
+        BoltType::Duration(self.into())
+    }
+}
+
 impl Into<BoltType> for chrono::NaiveDate {
     fn into(self) -> BoltType {
         BoltType::Date(self.into())
@@ -302,5 +319,14 @@ impl Into<BoltType> for &str {
 impl Into<BoltType> for bool {
     fn into(self) -> BoltType {
         BoltType::Boolean(self.into())
+    }
+}
+
+impl<T: Into<BoltType>> Into<BoltType> for Option<T> {
+    fn into(self) -> BoltType {
+        match self {
+            Some(s) => s.into(),
+            None => BoltType::Null(BoltNull::default()),
+        }
     }
 }

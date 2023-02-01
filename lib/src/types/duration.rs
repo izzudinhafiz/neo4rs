@@ -1,3 +1,4 @@
+use crate::errors::Error;
 use crate::types::*;
 use neo4rs_macros::BoltStruct;
 
@@ -45,6 +46,37 @@ impl Into<std::time::Duration> for BoltDuration {
         let seconds =
             self.seconds.value + (self.days.value * 24 * 3600) + (self.months.value * 2_629_800);
         std::time::Duration::new(seconds as u64, self.nanoseconds.value as u32)
+    }
+}
+
+impl Into<BoltDuration> for chrono::Duration {
+    fn into(self) -> BoltDuration {
+        let seconds = self.num_seconds();
+        let nanos = self.num_nanoseconds().unwrap_or_default();
+        BoltDuration::new(
+            0.into(),
+            0.into(),
+            (seconds as i64).into(),
+            (nanos as i64).into(),
+        )
+    }
+}
+
+impl TryInto<chrono::Duration> for BoltDuration {
+    type Error = Error;
+    fn try_into(self) -> Result<chrono::Duration> {
+        let seconds =
+            self.seconds.value + (self.days.value * 24 * 3600) + (self.months.value * 2_629_800);
+        let duration_res = chrono::Duration::from_std(std::time::Duration::new(
+            seconds as u64,
+            self.nanoseconds.value as u32,
+        ));
+
+        if let Ok(duration) = duration_res {
+            Ok(duration)
+        } else {
+            Err(Error::ConverstionError)
+        }
     }
 }
 
