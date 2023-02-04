@@ -75,7 +75,7 @@ impl TryInto<chrono::Duration> for BoltDuration {
         if let Ok(duration) = duration_res {
             Ok(duration)
         } else {
-            Err(Error::ConverstionError)
+            Err(Error::ConvertError(BoltType::Duration(self.clone())))
         }
     }
 }

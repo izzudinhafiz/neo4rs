@@ -39,7 +39,7 @@ impl TryInto<(NaiveTime, FixedOffset)> for BoltTime {
         if time.is_some() && offset.is_some() {
             Ok((time.unwrap(), offset.unwrap()))
         } else {
-            Err(Error::ConverstionError)
+            Err(Error::ConvertError(BoltType::Time(self.clone())))
         }
     }
 }
@@ -65,7 +65,7 @@ impl TryInto<NaiveTime> for BoltLocalTime {
         if let Some(time) = NaiveTime::from_num_seconds_from_midnight_opt(seconds, nanoseconds) {
             Ok(time)
         } else {
-            Err(Error::ConverstionError)
+            Err(Error::ConvertError(BoltType::LocalTime(self.clone())))
         }
     }
 }

@@ -48,7 +48,7 @@ impl TryInto<(NaiveDateTime, String)> for BoltDateTimeZoneId {
         {
             Ok((datetime, self.tz_id.into()))
         } else {
-            Err(Error::ConverstionError)
+            Err(Error::ConvertError(BoltType::DateTimeZoneId(self.clone())))
         }
     }
 }
@@ -74,7 +74,7 @@ impl TryInto<NaiveDateTime> for BoltLocalDateTime {
         {
             Ok(datetime)
         } else {
-            Err(Error::ConverstionError)
+            Err(Error::ConvertError(BoltType::LocalDateTime(self.clone())))
         }
     }
 }
@@ -105,7 +105,7 @@ impl TryInto<DateTime<FixedOffset>> for BoltDateTime {
         if let (Some(datetime), Some(offset)) = (datetime_opt, offset_opt) {
             Ok(DateTime::from_utc(datetime, offset))
         } else {
-            Err(Error::ConverstionError)
+            Err(Error::ConvertError(BoltType::DateTime(self.clone())))
         }
     }
 }

@@ -27,9 +27,9 @@ impl TryInto<NaiveDate> for BoltDate {
         if let Some(epoch) = NaiveDate::from_ymd_opt(1970, 1, 1) {
             epoch
                 .checked_add_signed(days)
-                .ok_or(Error::ConverstionError)
+                .ok_or(Error::ConvertError(BoltType::Date(self.clone())))
         } else {
-            Err(Error::ConverstionError)
+            Err(Error::ConvertError(BoltType::Date(self.clone())))
         }
     }
 }
