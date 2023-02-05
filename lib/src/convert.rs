@@ -151,6 +151,22 @@ impl TryFrom<BoltType> for (chrono::NaiveDateTime, String) {
     }
 }
 
+impl<A: TryFrom<BoltType>> TryFrom<BoltType> for Vec<A> {
+    type Error = Error;
+
+    fn try_from(input: BoltType) -> Result<Vec<A>> {
+        match input {
+            BoltType::List(l) => Ok(l
+                .value
+                .to_vec()
+                .iter()
+                .flat_map(|x| A::try_from(x.clone()))
+                .collect()),
+            _ => Err(Error::ConvertError(input)),
+        }
+    }
+}
+
 impl TryFrom<BoltType> for Vec<u8> {
     type Error = Error;
 
@@ -304,6 +320,14 @@ impl Into<BoltType> for (chrono::NaiveDateTime, &str) {
 impl Into<BoltType> for Vec<u8> {
     fn into(self) -> BoltType {
         BoltType::Bytes(BoltBytes::new(self.into()))
+    }
+}
+
+impl<A: Into<BoltType> + Clone> Into<BoltType> for Vec<A> {
+    fn into(self) -> BoltType {
+        BoltType::List(BoltList {
+            value: self.iter().map(|v| v.clone().into()).collect(),
+        })
     }
 }
 
