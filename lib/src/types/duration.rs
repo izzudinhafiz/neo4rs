@@ -65,7 +65,7 @@ impl TryInto<chrono::Duration> for BoltDuration {
             seconds as u64,
             self.nanoseconds.value as u32,
         ));
-        println!("{:?}", self);
+
         if let Ok(duration) = duration_res {
             Ok(duration)
         } else {
