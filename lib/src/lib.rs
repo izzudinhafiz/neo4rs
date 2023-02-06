@@ -420,32 +420,6 @@
 //!
 //! ```
 //!
-//! ## Raw bytes
-//!
-//!
-//! ```
-//! use neo4rs::*;
-//! use futures::stream::*;
-//! use uuid::Uuid;
-//!
-//! #[tokio::main]
-//! async fn main() {
-//!    let uri = "127.0.0.1:7687";
-//!    let user = "neo4j";
-//!    let pass = "neo";
-//!    let graph = Graph::new(uri, user, pass).await.unwrap();
-//!    let mut result = graph
-//!        .execute(query("RETURN $b as output").param("b", vec![11, 12]))
-//!        .await
-//!        .unwrap();
-//!    let row = result.next().await.unwrap().unwrap();
-//!    let b: Vec<u8> = row.get("output").unwrap();
-//!    assert_eq!(b, &[11, 12]);
-//!    assert!(result.next().await.unwrap().is_none());
-//! }
-//!
-//! ```
-//!
 //! ## Durations
 //!
 //!

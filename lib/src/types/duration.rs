@@ -51,14 +51,8 @@ impl Into<std::time::Duration> for BoltDuration {
 
 impl Into<BoltDuration> for chrono::Duration {
     fn into(self) -> BoltDuration {
-        let seconds = self.num_seconds();
         let nanos = self.num_nanoseconds().unwrap_or_default();
-        BoltDuration::new(
-            0.into(),
-            0.into(),
-            (seconds as i64).into(),
-            (nanos as i64).into(),
-        )
+        BoltDuration::new(0.into(), 0.into(), 0.into(), nanos.into())
     }
 }
 
@@ -71,7 +65,7 @@ impl TryInto<chrono::Duration> for BoltDuration {
             seconds as u64,
             self.nanoseconds.value as u32,
         ));
-
+        println!("{:?}", self);
         if let Ok(duration) = duration_res {
             Ok(duration)
         } else {
